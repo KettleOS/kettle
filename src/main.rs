@@ -1,28 +1,33 @@
 #![no_std]
 #![no_main]
+#![feature(abi_x86_interrupt)]
 
 mod logger;
+mod interrupts;
+mod panic;
 
-use core::fmt::Write;
-use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
-use crate::logger::Logger;
-
-static HELLO: &'static str = "Hello world!";
+use crate::interrupts::init_idt;
+use crate::logger::{BACKGROUND, ERR_COLOR, FOREGROUND, init_logger};
 
 entry_point!(kernel_main);
 
 pub fn kernel_main(info: &'static mut BootInfo) -> ! {
 	if let Some(framebuffer) = info.framebuffer.as_mut() {
-		let mut logger = Logger::new(framebuffer, (255, 255, 255));
-		logger.write_str(HELLO);
+		init_logger(framebuffer, FOREGROUND, BACKGROUND, ERR_COLOR);
+	} // pray to god this doesn't fail
+	
+	println!("Hello world!");
+	
+	// initialize idt
+	init_idt();
+	
+	// cause a pagefault
+	unsafe {
+		*(0xDEADBEEF as *mut usize) = 42;
 	}
 	
-	loop {}
-}
-
-// called on panic
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+	println!("Didn't crash");
+	
 	loop {}
 }
