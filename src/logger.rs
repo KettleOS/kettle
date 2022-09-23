@@ -50,10 +50,6 @@ pub fn foreground() -> (u8, u8, u8) {
 	logger().foreground
 }
 
-pub fn background() -> (u8, u8, u8) {
-	logger().background
-}
-
 pub fn err_color() -> (u8, u8, u8) {
 	logger().err_color
 }
@@ -92,10 +88,6 @@ impl Logger {
 	
 	pub fn clear(&mut self) {
 		Logger::fill_with_slice(&mut self.framebuffer, &self.background);
-	}
-	
-	fn rgb_to_slice(rgb: &(u8, u8, u8)) -> [u8; 3] {
-		[rgb.0, rgb.1, rgb.2]
 	}
 	
 	fn fill_with_slice(bytes: &mut [u8], rgb: &(u8, u8, u8)) {

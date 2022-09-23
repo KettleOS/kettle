@@ -5,29 +5,37 @@
 mod logger;
 mod interrupts;
 mod panic;
+mod gdt;
 
+use core::borrow::BorrowMut;
 use bootloader::{BootInfo, entry_point};
-use crate::interrupts::init_idt;
 use crate::logger::{BACKGROUND, ERR_COLOR, FOREGROUND, init_logger};
 
 entry_point!(kernel_main);
 
-pub fn kernel_main(info: &'static mut BootInfo) -> ! {
-	if let Some(framebuffer) = info.framebuffer.as_mut() {
+#[no_mangle]
+pub fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+	let boot_info: &'static mut BootInfo = (*boot_info).borrow_mut();
+	// pray to god this doesn't fail
+	if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
 		init_logger(framebuffer, FOREGROUND, BACKGROUND, ERR_COLOR);
-	} // pray to god this doesn't fail
+	} else {
+		loop {}
+	}
 	
 	println!("Hello world!");
 	
-	// initialize idt
-	init_idt();
+	x86_64::instructions::interrupts::int3();
 	
-	// cause a pagefault
-	unsafe {
-		*(0xDEADBEEF as *mut usize) = 42;
-	}
+	// init shit
+	init();
 	
 	println!("Didn't crash");
 	
 	loop {}
+}
+
+fn init() {
+	gdt::init();
+	interrupts::init_interrupts();
 }
