@@ -21,3 +21,7 @@
 
 # weird folder that thinks it can just appear out of thin air without my permission
 /out
+
+/kettle-boot/drive
+/kettle-kernel/drive
+/kettle-init/drive
