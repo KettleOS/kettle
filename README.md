@@ -9,3 +9,6 @@ So, you're interested in Kettle, are you? First of all, what *is* Kettle? Kettle
 - Define standard structures Operating Systems will follow such as file system layout, executable layout, and dynamic linking.
 - Provide a platform in which all executables will work the same on all Operating Systems and platforms alike.
 - Provide a standard by which operating systems (like Linux) provide extensions for interacting with other parts of the operating system not added by the kernel, such as providing a desktop API.
+
+# This is by no means finished
+This is not finished, nor is it close to being finished. I'm working on this as a hobby project of mine, but I mainly create Minecraft mods for Quilt. Expect this repository to go cold sporadically.
