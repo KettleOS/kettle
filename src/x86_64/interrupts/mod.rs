@@ -1,7 +1,7 @@
 use x86_64::instructions::port::Port;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use pic::PIC1_OFFSET;
-use crate::print;
+use crate::kernel_print;
 
 mod exceptions;
 mod pic;
@@ -39,7 +39,7 @@ pub(self) fn set_interrupt_handlers(idt: &mut InterruptDescriptorTable) {
 }
 
 extern "x86-interrupt" fn timer_handler(_: InterruptStackFrame) {
-	print!(".");
+	kernel_print!(".");
 	
 	unsafe {
 		pic::PICS.lock()
@@ -49,7 +49,7 @@ extern "x86-interrupt" fn timer_handler(_: InterruptStackFrame) {
 
 // IRQ7 workaround
 extern "x86-interrupt" fn irq7_handler(_: InterruptStackFrame) {
-	print!("?");
+	kernel_print!("?");
 	
 	unsafe {
 		let mut command: Port<u8> = Port::new(0x20);

@@ -1,0 +1,4 @@
+okey so first of all we need to get the funny boot image thing working
+then get the run-x86_64.sh thing working
+then we need to add serial logging for the kernel
+then we need to get the kernel working properly
