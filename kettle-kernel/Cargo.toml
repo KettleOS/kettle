@@ -1,0 +1,13 @@
+[package]
+name = "kettle-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[build-dependencies]
+dotenv = "0.15.0"
+
+[features]
+default = []
+platform_virt = []
