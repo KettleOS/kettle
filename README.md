@@ -9,7 +9,7 @@ Kettle is an open-source project consisting of a kernel (Kettle Kernel) and oper
 - Define standard structures operating systems will follow such as file system layout, executable layout, and dynamic linking.
 - Provide a standard by which operating systems (like Linux, or more importantly, Kettle) provide extensions for interacting with other parts of the operating system not added by the kernel, such as providing a desktop API.
 - Hardware-based attestation (needs specialized hardware) and other basic security features that would improve the desktop security model.
-- Attestation API compatibility with downstream forks (opt-out, based on the presence of security features).
+- Attestation API compatibility with downstream forks.
 ## Non-goals
 - Provide a platform in which all executables will work the same on all Operating Systems.
 - Provide compatibility for applications that work on other operating systems.
