@@ -3,9 +3,3 @@ resolver = "2"
 members = [
     "kettle-kernel",
 ]
-
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"

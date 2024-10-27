@@ -1,6 +1,8 @@
 use core::panic::PanicInfo;
 
+use crate::cpu;
+
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-	loop {}
+	cpu::wait_forever();
 }
