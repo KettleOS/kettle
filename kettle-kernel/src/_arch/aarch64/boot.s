@@ -27,7 +27,7 @@ _start:
 	stp	xzr,	xzr,	[x0],	#16 // Move __bss_start to __bss_end_exclusive.
 	b	.bss_init_loop
 
-// Prepare the Rust runtime.
+// Prepare the kernel runtime.
 .prepare_rt:
 	// Set the stack pointer
 	ADR_REL	x0,	__stack_end_exclusive
