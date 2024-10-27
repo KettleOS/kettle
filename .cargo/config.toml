@@ -9,5 +9,5 @@ target = ["aarch64-kettle-kernel.json"]
 runner = [
 	"bash",
 	"-c",
-	"source .env && qemu-system-aarch64 -M $PLATFORM,virtualization=on -cpu max,pauth-impdef=on -m 1024 -d in_asm -cpu cortex-a72 -display none -kernel target/aarch64-kettle-kernel/debug/kettle-kernel"
+	"source .env && qemu-system-aarch64 -M $PLATFORM,virtualization=on -cpu max,pauth-impdef=on -m 1024 -cpu cortex-a72 -serial stdio -display none -kernel target/aarch64-kettle-kernel/debug/kettle-kernel"
 ]

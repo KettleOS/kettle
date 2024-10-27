@@ -11,7 +11,7 @@ pub mod virt {}
 #[cfg(target_arch = "aarch64")]
 #[allow(unused_imports, unused_braces)]
 pub mod aarch64 {
-	pub use super::internal_platform::{BOOT_CORE_ID};
+	pub use super::internal_platform::{BOOT_CORE_ID, UART0};
 }
 
 /// Per-architecutre platform-specific exports.
