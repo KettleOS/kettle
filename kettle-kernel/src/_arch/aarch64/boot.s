@@ -22,9 +22,9 @@ _start:
 
 // Initialize .bss
 .bss_init_loop:
-	cmp	x0,	x1 // Ensure .bss is empty.
-	b.eq	.prepare_rt
-	stp	xzr,	xzr,	[x0],	#16 // Move __bss_start to __bss_end_exclusive.
+	cmp	x0,	x1
+	b.eq	.prepare_rt // Finish once .bss is initialized.
+	stp	xzr,	xzr,	[x0],	#16 // Initialize .bss until at __bss_end_exclusive.
 	b	.bss_init_loop
 
 // Prepare the kernel runtime.
