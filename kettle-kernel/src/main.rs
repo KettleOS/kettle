@@ -7,6 +7,8 @@
 // Lints
 #![forbid(unsafe_op_in_unsafe_fn)]
 
+use core::sync::atomic::AtomicBool;
+
 use brand::*;
 
 mod cpu;
@@ -17,6 +19,8 @@ mod io;
 mod brand;
 mod sync;
 
+static KERNEL_INITIALIZED: AtomicBool = AtomicBool::new(false);
+
 /// The main kernel entrypoint. This function is non-mangled for debug purposes; however, it is incompatible with FFI.
 ///
 /// It is ill-advised to call this function directly. Instead, implement an [_init_rt](cpu::boot::_init_rt) wrapper and call [kernel_main] from there.
@@ -25,13 +29,20 @@ mod sync;
 /// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
 #[no_mangle]
 pub unsafe fn kernel_main() {
-	println!("{KERNEL_BRAND} v{KERNEL_VERSION}");
-
 	// SAFETY:
 	// This function is only called once.
 	unsafe { kernel_init() };
 
+	print_kernel_brand();
+
 	panic!("Exiting from the kernel early. Bye bye!");
+}
+
+/// Prints the kernel brand.
+fn print_kernel_brand() {
+	if KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) {
+		println!("{KERNEL_BRAND} v{KERNEL_VERSION}");
+	}
 }
 
 /// Kernel and driver initialization happens here.
