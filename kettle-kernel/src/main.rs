@@ -11,6 +11,6 @@ mod platform;
 /// It is ill-advised to call this function directly. Instead, implement an [_init_rt](cpu::boot::_init_rt) wrapper and call [kernel_main] from there.
 ///
 /// # Safety
-/// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has been already been called will result in unexplainable crashes and is considered Undefined Behavior.
+/// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
 #[no_mangle]
 pub unsafe fn kernel_main() {}
