@@ -9,6 +9,7 @@ __virt_binary_start = 0x40080000;
 ENTRY(__virt_binary_start)
 
 PHDRS {
+	segment_stack	PT_LOAD	FLAGS(6);
 	segment_code	PT_LOAD FLAGS(5);
 	segment_data	PT_LOAD FLAGS(6);
 }
@@ -19,7 +20,7 @@ SECTIONS {
 	.stack (NOLOAD) : {
 		. = __virt_binary_start;
 		__stack_end_exclusive = .;
-	}
+	} :segment_stack
 
 	/* Code */
 	.text : {
