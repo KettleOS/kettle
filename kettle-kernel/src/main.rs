@@ -7,7 +7,7 @@
 // Lints
 #![forbid(unsafe_op_in_unsafe_fn)]
 
-use platform::aarch64::UART0;
+use brand::*;
 
 mod cpu;
 mod panic;
@@ -15,6 +15,7 @@ mod platform;
 mod console;
 mod io;
 mod brand;
+mod sync;
 
 /// The main kernel entrypoint. This function is non-mangled for debug purposes; however, it is incompatible with FFI.
 ///
@@ -24,6 +25,17 @@ mod brand;
 /// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
 #[no_mangle]
 pub unsafe fn kernel_main() {
-	println!("Hello world! UART0 is 0x{UART0:X}.");
+	println!("{KERNEL_BRAND} v{KERNEL_VERSION}");
+
+	// SAFETY:
+	// This function is only called once.
+	unsafe { kernel_init() };
+
 	panic!("Exiting from the kernel early. Bye bye!");
 }
+
+/// Kernel and driver initialization happens here.
+///
+/// # Safety
+/// You **must not** call this function twice. This function is originally called in [kernel_main] and should only be called there.
+unsafe fn kernel_init() {}
