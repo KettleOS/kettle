@@ -34,6 +34,8 @@ unsafe fn kernel_init() {
 
 	PRINT_DRIVER_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
 	KERNEL_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
+
+	debug_assert!(KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) && PRINT_DRIVER_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed), "Invalid state: kernel and print driver should be initialized by the end of `kernel_init`.");
 }
 
 /// The main kernel entrypoint.
