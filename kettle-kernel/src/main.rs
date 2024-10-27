@@ -20,13 +20,21 @@ mod brand;
 mod sync;
 mod driver;
 
+static PRINT_DRIVER_INITIALIZED: AtomicBool = AtomicBool::new(false);
 static KERNEL_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 /// Kernel and driver initialization happens here.
 ///
 /// # Safety
 /// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
-unsafe fn kernel_init() {}
+///
+/// Calling this function twice is only checked in debug builds.
+unsafe fn kernel_init() {
+	debug_assert!(!KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed), "`kernel_init` must not be called twice!");
+
+	PRINT_DRIVER_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
+	KERNEL_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
+}
 
 /// The main kernel entrypoint.
 ///
@@ -35,14 +43,32 @@ unsafe fn kernel_init() {}
 /// # Safety
 /// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
 unsafe fn kernel_main() {
+	if !KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) {
+		// We should be initialized by now. Panic!
+		unreachable!("`kernel_main` called before kernel was initialized. This should never happen! For kernel developers: rectify your implementation of `_init_rt`.");
+	}
+
 	print_kernel_brand();
 
-	panic!("Exiting from the kernel early. Bye bye!");
+	unimplemented!("Exiting from the kernel early. Bye bye!");
 }
 
 /// Prints the kernel brand.
+///
+/// # Panics
+/// Panics if called before [kernel_init] was called.
 fn print_kernel_brand() {
-	if KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) {
-		println!("{KERNEL_BRAND} v{KERNEL_VERSION}");
+	check_kernel_initialized();
+	println!("{KERNEL_BRAND} v{KERNEL_VERSION}");
+}
+
+/// Checks if the kernel is initialized.
+///
+/// # Panics
+/// Panics if the kernel is not initialized.
+#[inline(always)]
+fn check_kernel_initialized() {
+	if !KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) {
+		panic!("Attempted to call a function before the kernel was initialized.");
 	}
 }

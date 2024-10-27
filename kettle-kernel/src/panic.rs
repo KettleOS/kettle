@@ -1,6 +1,6 @@
 use core::{panic::PanicInfo, sync::atomic::AtomicBool};
 
-use crate::{brand::*, cpu, println};
+use crate::{brand::*, cpu, println, PRINT_DRIVER_INITIALIZED};
 
 static PANIC_ENTERED: AtomicBool = AtomicBool::new(false);
 
@@ -13,17 +13,20 @@ fn panic(info: &PanicInfo) -> ! {
 
 	PANIC_ENTERED.store(true, core::sync::atomic::Ordering::Relaxed);
 
-	let (file, line, column) = match info.location() {
-		Some(loc) => (loc.file(), loc.line(), loc.column()),
-		_ => ("???", 0, 0),
-	};
+	// Don't print if the driver is uninitialized.
+	if PRINT_DRIVER_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) {
+		let (file, line, column) = match info.location() {
+			Some(loc) => (loc.file(), loc.line(), loc.column()),
+			_ => ("???", 0, 0),
+		};
 
-	println!(
-		"Kernel panic!\n\n\
-		{file}:{line}:{column}: {}\n\n\
-		If you are sure this is a {BRAND} issue, report this on our issue tracker: {ISSUE_TRACKER}",
-		info.message()
-	);
+		println!(
+			"Kernel panic!\n\n\
+			{file}:{line}:{column}: {}\n\n\
+			If you are sure this is a {BRAND} issue, report this on our issue tracker: {ISSUE_TRACKER}",
+			info.message()
+		);
+	}
 
 	cpu::wait_forever();
 }
