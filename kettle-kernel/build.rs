@@ -11,7 +11,7 @@ fn main() {
 	let platform = env::var("PLATFORM").expect(format!("Available Platforms: {:}\nThere should be a .env file defining the PLATFORM environment variable", PLATFORMS.join(", ")).as_str());
 
 	// Call linker with linker script
-	println!("cargo::rustc-link-arg=-Tkettle-kernel/src/platform/{platform}/kernel.ld");
+	println!("cargo::rustc-link-arg=-Tkettle-kernel/src/platform/_{platform}/kernel.ld");
 
 	// Compile for platform-specific CPUs
 	match platform.as_str() {
