@@ -32,9 +32,12 @@ pub struct KernelInitLock<T: ?Sized> {
 	data: UnsafeCell<T>,
 }
 
+unsafe impl<T: ?Sized> Sync for KernelInitLock<T> {}
+unsafe impl<T: ?Sized> Send for KernelInitLock<T> {}
+
 impl<T> KernelInitLock<T> {
 	/// Constructs a new [NullLock] that is unlocked.
-	pub fn new(data: T) -> Self {
+	pub const fn new(data: T) -> Self {
 		Self {
 			data: UnsafeCell::new(data),
 		}

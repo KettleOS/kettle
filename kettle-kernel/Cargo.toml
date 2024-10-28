@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+thiserror-no-std = "2"
+uuid = { version = "1", default-features = false }
 
 [build-dependencies]
 dotenv = "0.15.0"
