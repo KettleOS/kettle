@@ -1,3 +1,5 @@
+pub mod driver;
+
 /// The core on which boot code is run.
 #[no_mangle]
 #[link_section = ".text.static"]

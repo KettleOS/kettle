@@ -1,6 +1,4 @@
-use core::fmt::Write;
-
-use crate::console;
+use crate::{console, fmt::Write as _};
 
 #[doc(hidden)]
 pub fn _print(arguments: core::fmt::Arguments) {

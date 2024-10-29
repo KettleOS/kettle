@@ -14,7 +14,7 @@ pub type DriverResult<T> = Result<T, DriverError>;
 pub type PostDriverInitCallback = unsafe fn() -> DriverInitResult<()>;
 
 struct InnerDriverManager<const DRIVER_COUNT: usize> {
-	drivers: [Option<KernelDriverDescriptor<'static>>; DRIVER_COUNT],
+	drivers: [Option<KernelDriverDescriptor>; DRIVER_COUNT],
 	drivers_size: usize,
 }
 
@@ -35,7 +35,7 @@ impl<const DRIVER_COUNT: usize> DriverManager<DRIVER_COUNT> {
 		}
 	}
 
-	pub fn register(&self, driver: KernelDriverDescriptor<'static>) -> DriverResult<()> {
+	pub fn register(&self, driver: KernelDriverDescriptor) -> DriverResult<()> {
 		self.inner.read(|inner| {
 			// Check for existing driver.
 			for existing_driver in inner.drivers.iter() {
@@ -60,7 +60,7 @@ impl<const DRIVER_COUNT: usize> DriverManager<DRIVER_COUNT> {
 		self.inner.write(|inner: &mut InnerDriverManager<DRIVER_COUNT>| {
 			for driver in inner.drivers.iter_mut() {
 				if let Some(driver) = driver {
-					unsafe { driver.get_mut().init()? };
+					unsafe { driver.get().init()? };
 				}
 			}
 
@@ -69,25 +69,32 @@ impl<const DRIVER_COUNT: usize> DriverManager<DRIVER_COUNT> {
 	}
 }
 
+pub type KernelDriverRef = &'static (dyn KernelDriver + Sync);
+
 /// A container for a [KernelDriver] with metadata.
-pub struct KernelDriverDescriptor<'a> {
-	driver: &'a mut (dyn KernelDriver + Sync),
-	post_init_callback: PostDriverInitCallback,
+pub struct KernelDriverDescriptor {
+	driver: KernelDriverRef,
+	post_init_callback: Option<PostDriverInitCallback>,
 }
 
-impl<'a> KernelDriverDescriptor<'a> {
+impl KernelDriverDescriptor {
+	pub fn new(
+		driver: KernelDriverRef,
+		post_init_callback: Option<PostDriverInitCallback>,
+	) -> Self {
+		Self {
+			driver,
+			post_init_callback,
+		}
+	}
+
 	#[inline]
-	pub fn get(&'a self) -> &'a (dyn KernelDriver + Sync) {
+	pub fn get(&'static self) -> KernelDriverRef {
 		self.driver
 	}
 
 	#[inline]
-	pub fn get_mut(&'a mut self) -> &'a mut (dyn KernelDriver + Sync) {
-		self.driver
-	}
-
-	#[inline]
-	pub fn post_init_callback(&self) -> PostDriverInitCallback {
+	pub fn post_init_callback(&self) -> Option<PostDriverInitCallback> {
 		self.post_init_callback
 	}
 }
@@ -105,5 +112,14 @@ pub trait KernelDriver {
 
 	/// # Safety
 	/// Each [KernelDriver::init] function has unique safety requirements that potentially encompass the entire system. Refer to their documentation for more information.
-	unsafe fn init(&mut self) -> DriverInitResult<()>;
+	unsafe fn init(&self) -> DriverInitResult<()>;
+
+	/// A convenience method for instantiating a [DriverError::Uninitialized].
+	#[inline(always)]
+	fn uninitialized(&self) -> DriverError {
+		DriverError::Uninitialized {
+			uuid: self.uuid(),
+			name: self.name(),
+		}
+	}
 }

@@ -1,12 +1,16 @@
-pub struct QEMUConsole;
+use core::fmt::Write;
 
-impl super::Console for QEMUConsole {}
+use crate::{platform::aarch64::driver::{UartDriver, UART_DRIVER}, sync::{KernelInitLock, RwExLock}};
 
-impl core::fmt::Write for QEMUConsole {
+struct UartConsoleInner {
+	driver: &'static UartDriver,
+}
+
+impl core::fmt::Write for UartConsoleInner {
 	fn write_str(&mut self, s: &str) -> core::fmt::Result {
 		for char in s.bytes() {
 			unsafe {
-				core::ptr::write_volatile(crate::platform::aarch64::UART0 as *mut u8, char);
+				core::ptr::write_volatile(self.driver.address().unwrap() as *mut u8, char);
 			}
 		}
 
@@ -14,6 +18,30 @@ impl core::fmt::Write for QEMUConsole {
 	}
 }
 
-pub fn console() -> impl super::Console {
-	QEMUConsole
+pub struct UartConsole {
+	inner: KernelInitLock<UartConsoleInner>,
+}
+
+static CONSOLE: UartConsole = UartConsole {
+	inner: KernelInitLock::new(
+		UartConsoleInner {
+			driver: &UART_DRIVER,
+		},
+	),
+};
+
+impl super::Console for UartConsole {}
+
+impl crate::fmt::Write for UartConsole {
+	fn write_str(&self, s: &str) -> core::fmt::Result {
+		self.inner.write(|inner| inner.write_str(s))
+	}
+
+	fn write_fmt(&self, args: core::fmt::Arguments<'_>) -> core::fmt::Result {
+		self.inner.write(|inner| inner.write_fmt(args))
+	}
+}
+
+pub fn console() -> &'static impl super::Console {
+	&CONSOLE
 }

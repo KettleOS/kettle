@@ -10,6 +10,8 @@
 use core::sync::atomic::AtomicBool;
 
 use brand::*;
+use driver::{KernelDriverDescriptor, DRIVER_MANAGER};
+use error::KernelResult;
 
 mod cpu;
 mod panic;
@@ -19,6 +21,8 @@ mod io;
 mod brand;
 mod sync;
 mod driver;
+mod error;
+mod fmt;
 
 static PRINT_DRIVER_INITIALIZED: AtomicBool = AtomicBool::new(false);
 static KERNEL_INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -29,13 +33,24 @@ static KERNEL_INITIALIZED: AtomicBool = AtomicBool::new(false);
 /// You **must not** call this function outside of an [_init_rt](cpu::boot::_init_rt) wrapper. Calling this function after it has already been called will result in unexplainable crashes and is considered Undefined Behavior.
 ///
 /// Calling this function twice is only checked in debug builds.
-unsafe fn kernel_init() {
+unsafe fn kernel_init() -> KernelResult<()> {
 	debug_assert!(!KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed), "`kernel_init` must not be called twice!");
+
+	#[cfg(feature = "platform_virt")]
+	{
+		let driver = KernelDriverDescriptor::new(
+			&platform::aarch64::driver::UART_DRIVER,
+			None,
+		);
+		DRIVER_MANAGER.register(driver)?;
+	}
 
 	PRINT_DRIVER_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
 	KERNEL_INITIALIZED.store(true, core::sync::atomic::Ordering::Relaxed);
 
 	debug_assert!(KERNEL_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed) && PRINT_DRIVER_INITIALIZED.load(core::sync::atomic::Ordering::Relaxed), "Invalid state: kernel and print driver should be initialized by the end of `kernel_init`.");
+
+	Ok(())
 }
 
 /// The main kernel entrypoint.

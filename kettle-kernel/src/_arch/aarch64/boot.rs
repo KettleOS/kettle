@@ -11,7 +11,7 @@ pub unsafe extern "C" fn _init_rt() -> ! {
 	// SAFETY:
 	// These functions are only called once inside _init_rt.
 	unsafe {
-		kernel_init();
+		kernel_init().unwrap();
 		kernel_main();
 	}
 
