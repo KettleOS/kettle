@@ -1,5 +1,3 @@
 {
-	"rust-analyzer.cargo.features": [
-		"platform_virt"
-	]
+	"rust-analyzer.check.allTargets": false
 }

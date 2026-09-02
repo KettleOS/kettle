@@ -42,6 +42,7 @@ unsafe fn kernel_init() -> KernelResult<()> {
 			&platform::aarch64::driver::UART_DRIVER,
 			None,
 		);
+		let driver = KernelDriverDescriptor::new();
 		DRIVER_MANAGER.register(driver)?;
 	}
 
